@@ -55,6 +55,6 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1 (11/4/2026)
         with:
           archive: false
-          path: target/release/libwidevinecdm.dylib
+          path: target/x86_64-apple-darwin/release/libwidevinecdm.dylib
           if-no-files-found: error
           retention-days: 7
