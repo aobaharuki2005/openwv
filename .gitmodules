@@ -1,3 +1,6 @@
 [submodule "include/cdm"]
 	path = third-party/cdm
 	url = https://chromium.googlesource.com/chromium/cdm
+[submodule "third-party/cc"]
+	path = third-party/cc
+	url = https://github.com/aobaharuki2005/cc-rs
