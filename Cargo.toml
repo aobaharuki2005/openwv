@@ -46,3 +46,6 @@ panic = "abort"
 panic = "abort"
 strip = "symbols"
 lto = "fat"
+
+[patch.crates-io]
+cc = { path = "third-party/cc" }
