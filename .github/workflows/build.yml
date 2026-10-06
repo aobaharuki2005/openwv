@@ -1,0 +1,57 @@
+name: Build custom OpenWV for legacy OS X
+
+on:
+  push:
+
+jobs:
+  build:
+    name: Build
+    runs-on: macos-15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 1
+          submodules: true
+      
+      - name: Select Xcode 16.0
+        run: sudo xcode-select -s /Applications/Xcode_16.app/Contents/Developer
+
+      - name: Set necessary build env
+        run: |
+          echo "SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX15.sdk" >> $GITHUB_ENV
+          echo "MACOSX_DEPLOYMENT_TARGET=10.7" >> $GITHUB_ENV
+          echo "LDFLAGS=-ld_classic -arch x86_64" >> $GITHUB_ENV
+          echo CFLAGS="-arch x86_64" >> $GITHUB_ENV
+          echo CXXFLAGS="-arch x86_64" >> $GITHUB_ENV
+          echo CFLAGS_x86_64_apple_darwin="-arch x86_64" >> $GITHUB_ENV
+
+      - name: Download patched Rust
+        run: |
+          export RUST_VERSION=1.90.0
+          if [ ! -d "$HOME/.rustup/toolchains/${RUST_VERSION}-custom-aarch64" ]; then
+            echo "Cached Rust ${RUST_VERSION}-custom-aarch64 not found. Starting bootstrap..."
+            aria2c -x4 https://github.com/aobaharuki2005/rust/releases/download/${RUST_VERSION}-custom/${RUST_VERSION}-custom-aarch64.zip
+            mkdir -p ~/.rustup/toolchains
+            unzip -q ${RUST_VERSION}-custom-aarch64.zip -d ~/.rustup/toolchains
+            echo "Bootstrap Rust ${RUST_VERSION}-custom-aarch64 finished."
+          fi
+        
+          # Change default Rust toolchain
+          rustup default ${RUST_VERSION}-custom-aarch64
+          rustup override set ${RUST_VERSION}-custom-aarch64
+
+          # Verify Rust installation
+          cargo --version
+          rustc --version
+
+      - name: Build the dylib
+        run: cargo build --release --target x86_64-apple-darwin
+
+      - name: Upload the built dylib
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1 (11/4/2026)
+        with:
+          archive: false
+          path: target/release/libwidevinecdm.dylib
+          if-no-files-found: error
+          retention-days: 7
