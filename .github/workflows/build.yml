@@ -47,7 +47,7 @@ jobs:
 
       - name: Build the dylib and check the target directory structure
         run: |
-          cargo build --release --target x86_64-apple-darwin
+          cargo build --profile dev --target x86_64-apple-darwin
           brew install tree
           tree -L 3 ./target
 
